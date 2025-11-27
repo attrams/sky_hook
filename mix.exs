@@ -2,6 +2,8 @@ defmodule SkyHook.MixProject do
   use Mix.Project
 
   def project do
+    check_dotenv_file!()
+
     [
       app: :sky_hook,
       version: "0.1.0",
@@ -13,6 +15,21 @@ defmodule SkyHook.MixProject do
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
       listeners: [Phoenix.CodeReloader]
     ]
+  end
+
+  def check_dotenv_file! do
+    if Mix.env() in [:dev, :test] do
+      file = ".env"
+
+      if !File.exists?(file) do
+        Mix.raise("""
+        The local development file, '#{file}', is missing.
+        Please create this file and populate it with your local secrets.
+        (e.g., DATABASE_USERNAME, DATABASE_PASSWORD) and other keys specified in
+        the '.env.example' file.
+        """)
+      end
+    end
   end
 
   # Configuration for the OTP application.
