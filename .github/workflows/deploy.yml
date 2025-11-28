@@ -1,0 +1,92 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Elixir CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: postgres
+        ports: ['5432:5432']
+        env:
+          POSTGRES_USER: ${{ secrets.DATABASE_USERNAME }}
+          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      MIX_ENV: test
+      DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Elixir & Erlang
+      uses: erlef/setup-beam@v1.18.2 # v1.16.0
+      with:
+        elixir-version: '1.15.2' # [Required] Define the Elixir version
+        otp-version: '26.0'      # [Required] Define the Erlang/OTP version
+
+    - name: Install Hex & Rebar
+      run: |
+        mix local.hex --force
+        mix local.rebar --force
+        
+    - name: Restore dependencies cache
+      uses: actions/cache@v3
+      with:
+        path: deps
+        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-mix-
+        
+    - name: Output Elixir & Erlang version
+      run: elixir --version
+      
+    - name: Output PostgreSQL version
+      run: psql --version
+      
+    - name: Install dependencies
+      run: mix deps.get
+
+    - name: Install Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "18"
+
+    - name: Cache Node modules
+      uses: actions/cache@v4
+      with:
+        path: assets/node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('assets/package-lock.json') }}
+
+    - name: Install Node deps
+      run: |
+        cd assets
+        npm install
+
+    - name: Build assets (Tailwind + esbuild)
+      run: mix assets.deploy
+
+    - name: Create & migrate database
+      run: |
+        mix ecto.create
+        mix ecto.migrate
+      
+    - name: Run tests
+      run: mix test
