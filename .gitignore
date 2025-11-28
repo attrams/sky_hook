@@ -37,3 +37,6 @@ npm-debug.log
 
 # Add environment variables
 .env
+
+# Crash Dumps
+*.dump
