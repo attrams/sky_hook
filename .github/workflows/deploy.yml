@@ -62,7 +62,7 @@ jobs:
       run: psql --version
       
     - name: Install dependencies
-      run: mix deps.get
+      run: mix deps.get --only prod
 
     - name: Compile project
       run: mix compile
