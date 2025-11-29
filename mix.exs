@@ -11,7 +11,28 @@ defmodule SkyHook.MixProject do
       aliases: aliases(),
       deps: deps(),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
-      listeners: [Phoenix.CodeReloader]
+      listeners: [Phoenix.CodeReloader],
+      releases: releases()
+    ]
+  end
+
+  # Defines release configurations for Mix
+  defp releases() do
+    [
+      sky_hook: [
+        # Include OS-specific executables for unix targets.
+        include_executables_for: [:unix],
+
+        # Configure OTP applications inside the release.
+        # `runtime_tools` for tracing and debugging.
+        # Marked as :permanent so if it crashes, the entire node restarts.
+        applications: [
+          runtime_tools: :permanent
+        ],
+
+        # Produces the .tar.gz archive during assembling.
+        steps: [:assemble, :tar]
+      ]
     ]
   end
 
