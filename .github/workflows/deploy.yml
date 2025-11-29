@@ -111,4 +111,4 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         source: "_build/prod/*.tar.gz"
         target: "~/uploads/RELEASES"
-        strip_compenents: 2
+        strip_components: 2
