@@ -71,7 +71,7 @@ jobs:
       env:
         MIX_ENV: test
 
-    - name: Create & migrate database
+    - name: Create & migrate database (Test)
       run: |
         mix ecto.create
         mix ecto.migrate
@@ -85,10 +85,10 @@ jobs:
 
     # --- PHASE 2: BUILDING FOR PRODUCTION ---
 
-    - name: Insall Dependencies
+    - name: Insall Dependencies (Prod)
       run: |
         mix deps.get --only prod
-        mix deps.compile
+        mix compile
         mix assets.deploy
         mix phx.gen.release
       env:
