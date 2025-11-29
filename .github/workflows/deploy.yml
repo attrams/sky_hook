@@ -12,7 +12,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test:
+  Test_and_Deploy:
     runs-on: ubuntu-latest
 
     services:
@@ -111,4 +111,4 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         source: "_build/prod/*.tar.gz"
         target: "~/uploads/RELEASES"
-        strip_compenents: 4
+        strip_compenents: 2
