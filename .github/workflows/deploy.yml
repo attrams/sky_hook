@@ -12,7 +12,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build_and_deploy:
+  test:
     runs-on: ubuntu-latest
 
     services:
@@ -29,7 +29,6 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      MIX_ENV: test
       DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
       DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
 
@@ -60,20 +59,44 @@ jobs:
       
     - name: Output PostgreSQL version
       run: psql --version
+
+
+    # --- PHASE 1: TESTING ---
       
-    - name: Install dependencies
-      run: mix deps.get --only prod
-
-    - name: Compile project
-      run: mix compile
-
-    - name: Build assets (Tailwind + esbuild)
-      run: mix assets.deploy
+    - name: Install & Compile Dependencies (Test)
+      run: |
+        mix deps.get
+        mix compile
+        mix assets.deploy
+      env:
+        MIX_ENV: test
 
     - name: Create & migrate database
       run: |
         mix ecto.create
         mix ecto.migrate
+      env:
+        MIX_ENV: test
       
     - name: Run tests
       run: mix test
+      env:
+        MIX_ENV: test
+
+    # --- PHASE 2: BUILDING FOR PRODUCTION ---
+
+    - name: Insall Dependencies
+      run: |
+        mix deps.get --only prod
+        mix deps.compile
+        mix assets.deploy
+        mix phx.gen.release
+      env:
+        MIX_ENV: prod
+
+    - name: Build Release
+      run: mix release
+      env:
+        MIX_ENV: prod
+
+    # --- PHASE 3: DEPLOYING TO VPS ---
