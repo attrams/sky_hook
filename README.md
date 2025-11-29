@@ -1,4 +1,4 @@
-# SkyHook
+# SkyHook [![Elixir CI](https://github.com/attrams/sky_hook/actions/workflows/deploy.yml/badge.svg)](https://github.com/attrams/sky_hook/actions/workflows/deploy.yml)
 This is a phoenix project to test how to deploy a phoenix application to a vps(Virtual Private Server).
 
 ## Initial Configuration
