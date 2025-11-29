@@ -94,9 +94,21 @@ jobs:
       env:
         MIX_ENV: prod
 
-    - name: Build Release
+    - name: Build Release (Prod)
       run: mix release
       env:
         MIX_ENV: prod
 
     # --- PHASE 3: DEPLOYING TO VPS ---
+
+    - name: Copy Tar to VPS via SCP
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        port: ${{ secrets.SSH_PORT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        passphrase: ${{ secrets.SSH_PASSPHRASE }}
+        source: "_build/prod/*.tar.gz"
+        target: "~/uploads/RELEASES"
+        strip_compenents: 4
